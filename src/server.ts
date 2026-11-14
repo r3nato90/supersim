@@ -2,8 +2,6 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import whitePageHtml from "./cf-white.html?raw";
-import { gateHomeRequest, resolveCloakApiKey } from "./lib/cloak";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -48,10 +46,6 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
-    // Cloak: só age em GET /. Bloqueado/fail-safe -> página branca local (nunca a oferta).
-    const cloakResponse = await gateHomeRequest(request, resolveCloakApiKey(env), whitePageHtml);
-    if (cloakResponse) return cloakResponse;
-
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
